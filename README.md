@@ -3,8 +3,7 @@ Custom CNN • Data Augmentation • 77% Accuracy
 
 # 📌 Project Overview
 
-This project implements an end-to-end Convolutional Neural Network (CNN) trained on the CIFAR-10 dataset using TensorFlow + Keras.
-The goal was to build a clean, structured deep learning workflow while improving model generalization through regularization and augmentation.
+This project implements a custom Convolutional Neural Network (CNN) trained on the CIFAR-10 dataset, achieving strong performance on 10 object categories. The model is built from scratch using TensorFlow/Keras and includes data augmentation, batch normalization, dropout, and learning-rate scheduling for performance stability.
 
 # 🚀 Key Features
 
