@@ -12,7 +12,7 @@ A CNN built from scratch in TensorFlow / Keras — no pretrained weights.
 
 ---
 
-## 📊 Results
+## 📊 Result
 
 | Metric | Value |
 |:---|:---|
