@@ -1,97 +1,156 @@
-# CIFAR-10 Image Classification with a CNN
+<div align="center">
 
-A convolutional neural network built from scratch in TensorFlow/Keras, trained to classify the ten CIFAR-10 object categories. **77.82% test accuracy** after 10 epochs.
+# 🖼️ CIFAR-10 Image Classification
+
+### A Convolutional Neural Network built from scratch in TensorFlow / Keras
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/iamtanishqjain/CNN_CIFAR10/blob/main/CIFAR_10_CNN_Model.ipynb)
-![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
-![TensorFlow](https://img.shields.io/badge/TensorFlow-Keras-orange)
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
+![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-FF6F00?logo=tensorflow&logoColor=white)
+![Keras](https://img.shields.io/badge/Keras-D00000?logo=keras&logoColor=white)
+![Accuracy](https://img.shields.io/badge/Test_Accuracy-77.82%25-success)
+
+**No pretrained weights. No transfer learning. Just a CNN, built layer by layer.**
+
+</div>
 
 ---
 
-## Overview
+## 🎯 The Task
 
-CIFAR-10 is 60,000 32×32 colour images across ten classes — airplane, automobile, bird, cat, deer, dog, frog, horse, ship, truck — split into 50,000 training and 10,000 test images.
+Classify 32×32 colour images into **10 categories**:
 
-This project builds the classifier end to end in a single notebook: no pretrained weights, no transfer learning. The point was to understand how each architectural choice affects what the network learns, so the model is deliberately simple enough to reason about.
+<div align="center">
 
-## Results
+✈️ airplane • 🚗 automobile • 🐦 bird • 🐱 cat • 🦌 deer
+🐶 dog • 🐸 frog • 🐴 horse • 🚢 ship • 🚚 truck
+
+</div>
+
+**60,000 images** — 50,000 for training, 10,000 for testing.
+
+---
+
+## 📊 Results
+
+<div align="center">
 
 | Metric | Value |
-| --- | --- |
-| Test accuracy | **77.82%** |
-| Test loss | 0.6575 |
-| Training accuracy (final epoch) | 78.64% |
-| Parameters | 1,250,858 (4.77 MB) |
-| Epochs | 10 |
-| Training time | ~6s/epoch on Colab GPU |
+|:---|:---|
+| 🎯 **Test Accuracy** | **77.82%** |
+| 📉 Test Loss | 0.6575 |
+| 🧮 Parameters | 1,250,858 *(4.77 MB)* |
+| ⏱️ Training Time | ~6s / epoch *(Colab GPU)* |
+| 🔁 Epochs | 10 |
 
-Accuracy climbed steadily across all ten epochs and had not plateaued:
+</div>
+
+**Validation accuracy per epoch**
 
 | Epoch | 1 | 3 | 5 | 7 | 10 |
-| --- | --- | --- | --- | --- | --- |
-| Validation accuracy | 64.70% | 72.22% | 74.73% | 76.41% | **77.82%** |
+|:---|:---:|:---:|:---:|:---:|:---:|
+| Accuracy | 64.70% | 72.22% | 74.73% | 76.41% | **77.82%** |
 
-Training and validation accuracy finished within one point of each other (78.64% vs 77.82%), so the dropout is doing its job — the model is not overfitting, it is simply undertrained. More epochs alone should push this higher.
+> 💡 **The interesting part:** training accuracy finished at 78.64% against 77.82% validation — a gap of less than one point. The model isn't overfitting, it's **undertrained**. Accuracy was still climbing when training stopped.
 
-## Architecture
+---
 
-A VGG-style stack: pairs of convolutions at increasing depth, each pair followed by pooling and dropout.
+## 🧠 Architecture
+
+A VGG-style stack — paired convolutions at increasing depth, each block followed by pooling and dropout.
 
 ```
-Input (32, 32, 3)
-
-Conv2D(32, 3×3, same, ReLU)  →  Conv2D(32, 3×3, ReLU)
-MaxPooling2D(2×2)  →  Dropout(0.25)
-
-Conv2D(64, 3×3, same, ReLU)  →  Conv2D(64, 3×3, ReLU)
-MaxPooling2D(2×2)  →  Dropout(0.25)
-
-Flatten  →  Dense(512, ReLU)  →  Dropout(0.5)
-Dense(10, softmax)
+                    Input  (32 × 32 × 3)
+                           │
+        ┌──────────────────▼──────────────────┐
+        │  Conv2D 32 · 3×3 · ReLU  (padding)  │
+        │  Conv2D 32 · 3×3 · ReLU             │   Block 1
+        │  MaxPool 2×2  →  Dropout 0.25       │
+        └──────────────────┬──────────────────┘
+        ┌──────────────────▼──────────────────┐
+        │  Conv2D 64 · 3×3 · ReLU  (padding)  │
+        │  Conv2D 64 · 3×3 · ReLU             │   Block 2
+        │  MaxPool 2×2  →  Dropout 0.25       │
+        └──────────────────┬──────────────────┘
+                           │  Flatten
+        ┌──────────────────▼──────────────────┐
+        │  Dense 512 · ReLU  →  Dropout 0.5   │   Classifier
+        │  Dense 10  · Softmax                │
+        └─────────────────────────────────────┘
 ```
 
-Design notes:
+**Why it's shaped this way**
 
-- **Stacked 3×3 convolutions** before each pooling layer widen the receptive field while keeping the parameter count lower than a single larger kernel would.
-- **Doubling filters** from 32 to 64 as spatial resolution halves keeps the compute per block roughly constant.
-- **Dropout increases with depth** (0.25 → 0.5). The dense layer holds most of the parameters, so it gets the heaviest regularization.
+| Choice | Reasoning |
+|:---|:---|
+| 🔲 **Stacked 3×3 convs** | Two small kernels widen the receptive field with fewer parameters than one large kernel |
+| 📈 **Filters 32 → 64** | Doubling depth as resolution halves keeps compute per block roughly constant |
+| 💧 **Dropout 0.25 → 0.5** | The dense layer holds most of the parameters, so it gets the strongest regularization |
 
-**Training setup:** Adam (default learning rate), categorical cross-entropy, batch size 64, pixels scaled to `[0, 1]`, labels one-hot encoded. The test set is used directly as validation data.
+---
 
-## Running it
+## ⚙️ Training Setup
 
-The fastest route is the Colab badge above — it needs no setup and CIFAR-10 downloads automatically through Keras.
+| | |
+|:---|:---|
+| **Optimizer** | Adam *(default learning rate)* |
+| **Loss** | Categorical cross-entropy |
+| **Batch size** | 64 |
+| **Preprocessing** | Pixels scaled to `[0, 1]`, labels one-hot encoded |
+| **Validation** | Test set used directly as validation data |
 
-To run locally:
+---
+
+## 🚀 Run It
+
+**Fastest way** — click the Colab badge. Zero setup, CIFAR-10 downloads itself through Keras.
+
+**Locally:**
 
 ```bash
 pip install tensorflow numpy matplotlib
 jupyter notebook CIFAR_10_CNN_Model.ipynb
 ```
 
-Then run all cells. Training takes about a minute on a GPU, a few minutes on CPU.
+Run all cells. About a minute on GPU, a few minutes on CPU. The last cell picks a random test image and shows the prediction against the true label.
 
-## Repository
+---
+
+## 📁 Structure
 
 ```
 CNN_CIFAR10/
-├── CIFAR_10_CNN_Model.ipynb   # the complete project: data, model, training, evaluation
-└── README.md
+├── 📓 CIFAR_10_CNN_Model.ipynb   →  data · model · training · evaluation
+└── 📄 README.md
 ```
 
-Everything lives in the one notebook, in the order you would build it: load the data, normalize, define the model, compile, train, then evaluate and plot. The final cell picks a random test image and shows the prediction against the true label.
+Everything sits in one notebook, in build order: load → normalize → define → compile → train → evaluate.
 
-## Where this goes next
+---
 
-The gap between training and validation accuracy is small, which points at capacity and training length rather than overfitting. In rough order of expected payoff:
+## 🛣️ Roadmap
 
-- **Train longer.** Accuracy was still improving at epoch 10; 40–50 epochs is the cheapest available gain.
-- **Data augmentation** — random flips, shifts and crops. The standard next step on CIFAR-10 and usually worth several points.
-- **Batch normalization** after each convolution, to stabilise training and allow a higher learning rate.
-- **Learning-rate scheduling**, decaying on plateau rather than holding Adam's default throughout.
-- **Transfer learning** with ResNet or MobileNetV2 for a realistic accuracy ceiling.
-- **Export the trained model** and add a small inference script, so predictions do not require rerunning the notebook.
+Ordered by expected payoff:
 
-## What I took from it
+- [ ] **Train longer** — accuracy hadn't plateaued at epoch 10; the cheapest gain available
+- [ ] **Data augmentation** — random flips, shifts, crops; usually worth several points on CIFAR-10
+- [ ] **Batch normalization** after each conv, for stabler training at a higher learning rate
+- [ ] **Learning-rate scheduling** — decay on plateau instead of a fixed Adam default
+- [ ] **Transfer learning** with ResNet / MobileNetV2 for a realistic accuracy ceiling
+- [ ] **Export the model** + a small inference script, so predictions don't need the notebook
 
-Building the network by hand rather than importing one made the trade-offs concrete: why convolutions are stacked before pooling, why filter counts double as resolution drops, and why the dense layer needs the most aggressive dropout. Reading the training curves — and recognising that a *small* train/validation gap means undertraining rather than success — turned out to be the more useful skill.
+---
+
+## 💭 Takeaways
+
+Building the network by hand instead of importing one made the trade-offs concrete — why convolutions stack before pooling, why filter counts double as resolution drops, why the dense layer needs the heaviest dropout.
+
+The more useful skill turned out to be **reading the curves**: recognising that a *small* train/validation gap means undertrained, not finished.
+
+<div align="center">
+
+---
+
+⭐ *Built while learning deep learning fundamentals*
+
+</div>
